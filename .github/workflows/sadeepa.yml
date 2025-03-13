@@ -28,7 +28,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install --prefer-offline --legacy-peer-deps || exit 0  # Error handling
+        run: npm install --prefer-offline --legacy-peer-deps || exit 0  # Error handlin
 
       - name: Build the Package
         run: npm run package
