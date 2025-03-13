@@ -5,7 +5,7 @@ on:
     branches:
       - sadeepa/feature/build-actions
     tags:
-      - 'v1.1'  # Triggers on any tag push
+      - 'v1.1*'  # Triggers on any tag push
 
 jobs:
   build_on_windows:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: windows-node-${{ hashFiles('package-lock.json') }}
+          key: windows-node-${{ hashFiles('/package-lock.json') }}
           restore-keys: |
             windows-node-
 
@@ -33,23 +33,11 @@ jobs:
       - name: Build the Package
         run: npm run package
 
-      - name: Find Windows Artifact
-        run: |
-          echo "Searching for Windows installer..."
-          $file = Get-ChildItem -Path release/build/ -Filter "*.exe" | Select-Object -ExpandProperty FullName
-          if ($file) {
-            echo "Found Windows installer at: $file"
-            echo "FILE_PATH=$file" >> $GITHUB_ENV
-          } else {
-            echo "No Windows installer found."
-            exit 1  # Fail the workflow if no artifact is found
-          }
-
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
-          path: ${{ env.FILE_PATH }}
+          name: windows-installer-ia32-setup
+          path: release/build/LibreLinkUpDesktop-0.1.13-ia32-setup.exe # Adjust the path based on actual output
           overwrite: true
 
   build_on_ubuntu:
@@ -62,7 +50,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ubuntu-node-${{ hashFiles('package-lock.json') }}
+          key: ubuntu-node-${{ hashFiles('/package-lock.json') }}
           restore-keys: |
             ubuntu-node-
 
@@ -77,18 +65,11 @@ jobs:
       - name: Build the Package
         run: npm run package
 
-      - name: Find and Upload Ubuntu Artifact
-        run: |
-          echo "Finding Ubuntu installer..."
-          FILE_PATH=$(find release/build/ -name "*.AppImage" -print -quit)
-          echo "Found: $FILE_PATH"
-          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
-
       - name: Upload Ubuntu Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-installer
-          path: ${{ env.FILE_PATH }}
+          name: ubuntu-installer-appimage
+          path: release/build/LibreLinkUpDesktop-0.1.13-x86_64.AppImage # Adjust path based on actual output
           overwrite: true
 
   build_on_mac:
@@ -101,7 +82,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: mac-node-${{ hashFiles('package-lock.json') }}
+          key: mac-node-${{ hashFiles('/package-lock.json') }}
           restore-keys: |
             mac-node-
 
@@ -116,16 +97,9 @@ jobs:
       - name: Build the Package
         run: npm run package
 
-      - name: Find and Upload macOS Artifact
-        run: |
-          echo "Finding macOS installer..."
-          FILE_PATH=$(find release/build/ -name "*.dmg" -print -quit)
-          echo "Found: $FILE_PATH"
-          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
-
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mac-installer
-          path: ${{ env.FILE_PATH }}
+          name: mac-installer-x64
+          path: release/build/LibreLinkUpDesktop-0.1.13-x64.dmg  # Adjust path based on actual output
           overwrite: true
