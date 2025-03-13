@@ -28,18 +28,22 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install --prefer-offline --legacy-peer-deps || exit 0  # Error handlin
+        run: npm install --prefer-offline --legacy-peer-deps || exit 0  # Error handling
 
       - name: Build the Package
         run: npm run package
 
-      - name: Find and Upload Windows Artifact
+      - name: Find Windows Artifact
         run: |
-          echo "Finding Windows installer..."
+          echo "Searching for Windows installer..."
           $file = Get-ChildItem -Path release/build/ -Filter "*.exe" | Select-Object -ExpandProperty FullName
-          echo "Found: $file"
-          echo "FILE_PATH=$file" >> $GITHUB_ENV
-        shell: pwsh
+          if ($file) {
+            echo "Found Windows installer at: $file"
+            echo "FILE_PATH=$file" >> $GITHUB_ENV
+          } else {
+            echo "No Windows installer found."
+            exit 1  # Fail the workflow if no artifact is found
+          }
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
